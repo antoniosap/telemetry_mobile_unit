@@ -13,7 +13,7 @@ PIN 07  SDI     <-- D12 MISO
 PIN 08  SCLK    <-- D13 SCK
 PIN 09  NSEL    <-- D10 CS
 PIN 10  NIRQ    <-- D2
-PIN 11
+PIN 11  SDN     <-- D1
 PIN 12
 PIN 13  ANTENNA
 PIN 14
@@ -31,6 +31,7 @@ D12 MISO -> SDI radio
 D11 MOSI <- SDO radio
 D10 CS  --> NSEL radio
 D2      --> NIRQ
+D1      --> SDN
 
 USCITE SERVO:
 D9  SERVO TILT
