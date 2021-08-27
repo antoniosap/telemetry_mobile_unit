@@ -1,6 +1,6 @@
 # telemetry_mobile_unit
 
-# schematic
+## schematic
 
 Si4432: 433mHZ radio
 PIN 01  GND
@@ -22,7 +22,6 @@ Arduino pro8MHzatmega328 3V3:
 PIN 31  TXD     per il USB converter    / serial sensor
 PIN 30  RXD     per il USB converter    / serial sensor
 
-
 RAW 5V0 <-- input from BEC
 GND GND common
 VCC 3V3 --> output to radio
@@ -36,8 +35,13 @@ D1      --> SDN
 USCITE SERVO:
 D9  SERVO TILT
 D8  SERVO PAN
-...
+
 USCITE DIGITAL:
-...
+D3
+D4
+
 INGRESSI ANALOGICI 0->3V3:
-...
+A0
+A1
+A2
+A3
