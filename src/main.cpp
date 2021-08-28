@@ -16,7 +16,7 @@
 // Si4432 has the following connections:
 #define RADIO_nSEL      10
 #define RADIO_nIRQ      2
-#define RADIO_SDN       1
+#define RADIO_SDN       5
 
 Si4432 radio = new Module(RADIO_nSEL, RADIO_nIRQ, RADIO_SDN);
 

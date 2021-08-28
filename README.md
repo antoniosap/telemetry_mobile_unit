@@ -2,6 +2,7 @@
 
 ## schematic
 
+https://www.electrodragon.com/w/Si4432
 Si4432: 433mHZ radio
 PIN 01  GND
 PIN 02  
@@ -13,8 +14,9 @@ PIN 07  SDI     <-- D12 MISO
 PIN 08  SCLK    <-- D13 SCK
 PIN 09  NSEL    <-- D10 CS
 PIN 10  NIRQ    <-- D2
-PIN 11  SDN     <-- D1
+PIN 11  SDN     <-- D5
 PIN 12
+...
 PIN 13  ANTENNA
 PIN 14
 
@@ -30,7 +32,7 @@ D12 MISO -> SDI radio
 D11 MOSI <- SDO radio
 D10 CS  --> NSEL radio
 D2      --> NIRQ
-D1      --> SDN
+D5      --> SDN
 
 USCITE SERVO:
 D9  SERVO TILT
