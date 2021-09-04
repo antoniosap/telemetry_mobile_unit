@@ -5,7 +5,7 @@
 
 //-- DEBUG ----------------------------------------------------------------------
 #define DEBUG_PIN               false
-#define DEBUG_VALUE             false
+#define DEBUG_VALUE             true
 
 #if DEBUG_PIN
 #define TEST_PIN(gpio_nr)          { Serial.print("TEST_PIN BEGIN:"); \
@@ -108,10 +108,6 @@ using namespace Menu;
 
 #define MAX_DEPTH   1
 
-result menuShowIP();
-result menuListAP();
-result menuSetUser();
-result menuSetPass();
 result menuSave();
 result menuInfo();
 result menuSetChannel();
@@ -120,14 +116,6 @@ result menuLoopbackTest();
 result menuRadioStatus();
 result menuDumpRadioRegisters();
 
-MENU(wifiMenu,"wifi",doNothing,noEvent,wrapStyle
-  ,OP("show IP",menuShowIP,enterEvent)
-  ,OP("list AP",menuListAP,enterEvent)
-  ,OP("set user",menuSetUser,enterEvent)
-  ,OP("set password",menuSetPass,enterEvent)
-  ,OP("save",menuSave,enterEvent)
-  ,EXIT("<Back")
-);
 
 MENU(radioMenu,"radio",doNothing,noEvent,wrapStyle
   ,OP("set channel",menuSetChannel,enterEvent)
@@ -136,7 +124,7 @@ MENU(radioMenu,"radio",doNothing,noEvent,wrapStyle
 );
 
 MENU(mainMenu,"system config",doNothing,noEvent,wrapStyle
-  ,SUBMENU(wifiMenu)
+  ,OP("save",menuSave,enterEvent)
   ,SUBMENU(radioMenu)
   ,OP("nav info",menuInfo,enterEvent)
   ,OP("loopback test",menuLoopbackTest,enterEvent)
@@ -172,7 +160,13 @@ void sensorReading() {
   analogA1 = voltageReading(A1);
   analogA2 = voltageReading(A2);
   analogA3 = voltageReading(A3);
+  packer.clear();
   packer.serialize(analogA0, analogA1, analogA2, analogA3);
+  PR("\nI:TX:A0:", analogA0);
+  PR("I:TX:A1:", analogA1);
+  PR("I:TX:A2:", analogA2);
+  PR("I:TX:A3:", analogA3);
+  PR("I:TX:SIZE:", packer.size());
   int state = radio.transmit((uint8_t *)packer.data(), packer.size());
 
   if (state == ERR_NONE) {
@@ -195,26 +189,6 @@ void sensorReading() {
 }
 
 //-------------------------------------------------------------------------------------------------------
-
-result menuShowIP() {
-  Serial.println("menuShowIP");
-  return proceed;
-}
-
-result menuListAP() {
-  Serial.println("menuListAP");
-  return proceed;
-}
-
-result menuSetUser() {
-  Serial.println("menuSetUser");
-  return proceed;
-}
-
-result menuSetPass() {
-  Serial.println("menuSetPass");
-  return proceed;
-}
 
 result menuSave() {
   Serial.println("menuSave");
@@ -259,7 +233,6 @@ result menuDumpRadioRegisters() {
     Serial.print(i, HEX);
     Serial.print(":");
     serialPrintBinary((uint8_t)module->SPIgetRegValue(i));
-    // Serial.println(module->SPIgetRegValue(i), BIN);
   }
   return proceed;
 }
