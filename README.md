@@ -9,8 +9,8 @@ PIN 02
 PIN 03
 PIN 04
 PIN 05  3V3
-PIN 06  SDO     <-- D11 MOSI
-PIN 07  SDI     <-- D12 MISO
+PIN 06  SDO     <-- D12 MISO
+PIN 07  SDI     <-- D11 MOSI
 PIN 08  SCLK    <-- D13 SCK
 PIN 09  NSEL    <-- D10 CS
 PIN 10  NIRQ    <-- D2
@@ -28,8 +28,8 @@ RAW 5V0 <-- input from BEC
 GND GND common
 VCC 3V3 --> output to radio
 D13 SCK --> SLCK radio
-D12 MISO -> SDI radio
-D11 MOSI <- SDO radio
+D12 MISO <- SDI radio
+D11 MOSI -> SDO radio
 D10 CS  --> NSEL radio
 D2      --> NIRQ
 D5      --> SDN
