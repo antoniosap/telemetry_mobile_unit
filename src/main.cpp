@@ -151,8 +151,8 @@ void sensorReading();
 Task sensorTask(5000, TASK_FOREVER, &sensorReading);
 Scheduler runner;
 
-float voltageReading(float value) {
-  return ((5*value)/1023)*4.103354632587859;
+float voltageReading(uint8_t pin) {
+  return analogRead(pin) * (3.3 / 1024.0); // @3V3
 }
 
 void sensorReading() {
