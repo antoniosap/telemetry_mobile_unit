@@ -4,6 +4,8 @@
 #include <Arduino.h>
 
 //-- DEBUG ----------------------------------------------------------------------
+#define DEBUG_MSG_TX            false
+#define DEBUG_MSG_RX            false
 #define DEBUG_PIN               false
 #define DEBUG_VALUE             true
 
@@ -31,6 +33,8 @@
 #endif
 
 #define PR_VALUE(msg, value)    { Serial.print(F(msg)); Serial.println(value); }
+#define PR_FLOAT(msg, value)    { Serial.print(F(msg)); Serial.println(value, 4); /* atmega version */ }
+
 
 /*
  * Uncomment to enable debug output.
@@ -86,7 +90,7 @@ float rxAnalogPan;
 float rxAnalogTilt;
 uint8_t rxBTNBlkValue = HIGH;    // unpressed
 uint8_t rxBTNRedValue = HIGH;    // unpressed
-#define PACKET_RX_SIZE (sizeof(float) * 2 + sizeof(uint8_t) * 2)
+#define PACKET_RX_SIZE    (12)   // matched bit-bit @ packer.size() trasmitter
 // TX PROTOCOL
 float analogA0;
 float analogA1;
@@ -107,7 +111,7 @@ MsgPack::Unpacker unpacker;
 
 using namespace Menu;
 
-#define MAX_DEPTH   1
+#define MAX_DEPTH   2
 
 result menuSave();
 result menuInfo();
@@ -163,10 +167,10 @@ void sensorReading() {
   analogA3 = voltageReading(A3);
   packer.clear();
   packer.serialize(analogA0, analogA1, analogA2, analogA3);
-  PR("\nI:TX:A0:", analogA0);
-  PR("I:TX:A1:", analogA1);
-  PR("I:TX:A2:", analogA2);
-  PR("I:TX:A3:", analogA3);
+  PR_FLOAT("\nI:TX:A0:", analogA0);
+  PR_FLOAT("I:TX:A1:", analogA1);
+  PR_FLOAT("I:TX:A2:", analogA2);
+  PR_FLOAT("I:TX:A3:", analogA3);
   PR("I:TX:SIZE:", packer.size());
   int state = radio.transmit((uint8_t *)packer.data(), packer.size());
 
@@ -219,7 +223,7 @@ result menuLoopbackTest() {
 }
 
 result menuRadioStatus() {
-  PR_VALUE("\nradio freq MHz: ", radioFreq);
+  PR_FLOAT("\nradio freq MHz: ", radioFreq);
   PR_VALUE("bit rate kb/s: ", radioBitRateKbSec);
   PR_VALUE("TX power: ", radioPower);
   PR_VALUE("RSSI:", module->SPIgetRegValue(SI443X_REG_RSSI));
@@ -274,16 +278,18 @@ void loop() {
   if (state == ERR_NONE) {
     // packet was successfully received
     Serial.println(F("I:Si4432:RX:success!"));
+    unpacker.clear();
     unpacker.feed(payload, PACKET_RX_SIZE);
     unpacker.deserialize(rxAnalogPan, rxAnalogTilt, rxBTNBlkValue, rxBTNRedValue);
 
     // print the data of the packet
     // Serial.print(F("I:Si4432:RX:Data:"));
     // nSerial.println((char*)payload);
-    PR_VALUE("\nI:RX:PAN:", rxAnalogPan);
-    PR_VALUE("I:RX:TILT:", rxAnalogTilt);
+    PR_FLOAT("\nI:RX:PAN:", rxAnalogPan);
+    PR_FLOAT("I:RX:TILT:", rxAnalogTilt);
     PR_VALUE("I:RX:BLK:", rxBTNBlkValue);
     PR_VALUE("I:RX:RED:", rxBTNRedValue);
+    PR_VALUE("I:RX:SIZE:", unpacker.size());
 
   } else if (state == ERR_RX_TIMEOUT) {
     // timeout occurred while waiting for a packet
