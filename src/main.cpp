@@ -40,7 +40,7 @@
  *         verbose - full transcript of all SPI/UART communication
  */
 
-#define RADIOLIB_DEBUG
+// #define RADIOLIB_DEBUG
 // #define RADIOLIB_VERBOSE
 
 
@@ -82,10 +82,11 @@ uint8_t radioPreambleLen = 40;
 
 //-- MSG PACK -------------------------------------------------------------------
 // RX PROTOCOL
-uint8_t pan;
-uint8_t tilt;
-uint8_t outd;   // bit 3 = PIN 3, pin 4 = PIN 4
-#define PACKET_RX_SIZE (sizeof(uint8_t) * 3)
+float rxAnalogPan;
+float rxAnalogTilt;
+uint8_t rxBTNBlkValue = HIGH;    // unpressed
+uint8_t rxBTNRedValue = HIGH;    // unpressed
+#define PACKET_RX_SIZE (sizeof(float) * 2 + sizeof(uint8_t) * 2)
 // TX PROTOCOL
 float analogA0;
 float analogA1;
@@ -274,11 +275,15 @@ void loop() {
     // packet was successfully received
     Serial.println(F("I:Si4432:RX:success!"));
     unpacker.feed(payload, PACKET_RX_SIZE);
-    unpacker.deserialize(pan, tilt, outd);
+    unpacker.deserialize(rxAnalogPan, rxAnalogTilt, rxBTNBlkValue, rxBTNRedValue);
 
     // print the data of the packet
-    Serial.print(F("I:Si4432:RX:Data:"));
-    Serial.println((char*)payload);
+    // Serial.print(F("I:Si4432:RX:Data:"));
+    // nSerial.println((char*)payload);
+    PR_VALUE("\nI:RX:PAN:", rxAnalogPan);
+    PR_VALUE("I:RX:TILT:", rxAnalogTilt);
+    PR_VALUE("I:RX:BLK:", rxBTNBlkValue);
+    PR_VALUE("I:RX:RED:", rxBTNRedValue);
 
   } else if (state == ERR_RX_TIMEOUT) {
     // timeout occurred while waiting for a packet
