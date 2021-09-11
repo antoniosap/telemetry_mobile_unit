@@ -96,6 +96,7 @@ float analogA0;
 float analogA1;
 float analogA2;
 float analogA3;
+uint8_t RSSI;
 // #define MSGPACK_DEBUGLOG_ENABLE
 #include <MsgPack.h>
 
@@ -165,12 +166,14 @@ void sensorReading() {
   analogA1 = voltageReading(A1);
   analogA2 = voltageReading(A2);
   analogA3 = voltageReading(A3);
+  RSSI = module->SPIgetRegValue(SI443X_REG_RSSI);
   packer.clear();
-  packer.serialize(analogA0, analogA1, analogA2, analogA3);
+  packer.serialize(analogA0, analogA1, analogA2, analogA3, RSSI);
   PR_FLOAT("\nI:TX:A0:", analogA0);
   PR_FLOAT("I:TX:A1:", analogA1);
   PR_FLOAT("I:TX:A2:", analogA2);
   PR_FLOAT("I:TX:A3:", analogA3);
+  PR("I:TX:RSSI:", RSSI);
   PR("I:TX:SIZE:", packer.size());
   int state = radio.transmit((uint8_t *)packer.data(), packer.size());
 
