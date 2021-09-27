@@ -43,7 +43,7 @@ D3
 D4
 
 INGRESSI ANALOGICI 0->3V3:
-A0
-A1
-A2
+A0  <-- current ramo #1 ACS712 30A con divisore 5V -> 3V3
+A1  <-- current ramo #2 ACS712 30A con divisore 5V -> 3V3
+A2  <-- temperatura VTX LM35
 A3
