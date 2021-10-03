@@ -91,11 +91,12 @@ float rxAnalogTilt;
 uint8_t rxBTNBlkValue = HIGH;    // unpressed
 uint8_t rxBTNRedValue = HIGH;    // unpressed
 #define PACKET_RX_SIZE    (12)   // matched bit-bit @ packer.size() trasmitter
+#define ACS712_DIVIDER_PROBE (5.0 / 3.3) // partitive resistor
 // TX PROTOCOL
-float analogA0;
-float analogA1;
-float analogA2;
-float analogA3;
+float currACS712nr1;
+float currACS712nr2;
+float tcLM35;
+float voltageA3;
 uint8_t RSSI;
 // #define MSGPACK_DEBUGLOG_ENABLE
 #include <MsgPack.h>
@@ -161,18 +162,30 @@ float voltageReading(uint8_t pin) {
   return analogRead(pin) * (3.3 / 1024.0); // @3V3
 }
 
+float round2(float value) {
+  return round(value * 100.0) / 100.0;
+}
+
+float acs712a30Reading(float value) {
+  float r = round2((value * ACS712_DIVIDER_PROBE - 2.5) * 0.066);
+  if (r > 0) 
+    return r; 
+  else
+    return -r;
+}
+
 void sensorReading() {
-  analogA0 = voltageReading(A0);
-  analogA1 = voltageReading(A1);
-  analogA2 = voltageReading(A2);
-  analogA3 = voltageReading(A3);
+  currACS712nr1 = acs712a30Reading(voltageReading(A0));
+  currACS712nr2 = acs712a30Reading(voltageReading(A1));
+  tcLM35 = round2(voltageReading(A2) * 100.0);
+  voltageA3 = voltageReading(A3);
   RSSI = module->SPIgetRegValue(SI443X_REG_RSSI);
   packer.clear();
-  packer.serialize(analogA0, analogA1, analogA2, analogA3, RSSI);
-  PR_FLOAT("\nI:TX:A0:", analogA0);
-  PR_FLOAT("I:TX:A1:", analogA1);
-  PR_FLOAT("I:TX:A2:", analogA2);
-  PR_FLOAT("I:TX:A3:", analogA3);
+  packer.serialize(currACS712nr1, currACS712nr2, tcLM35, voltageA3, RSSI);
+  PR_FLOAT("\nI:TX:I1:", currACS712nr1);
+  PR_FLOAT("I:TX:I2:", currACS712nr2);
+  PR_FLOAT("I:TX:TC:", tcLM35);
+  PR_FLOAT("I:TX:V3:", voltageA3);
   PR("I:TX:RSSI:", RSSI);
   PR("I:TX:SIZE:", packer.size());
   int state = radio.transmit((uint8_t *)packer.data(), packer.size());

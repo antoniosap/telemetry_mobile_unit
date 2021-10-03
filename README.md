@@ -47,3 +47,7 @@ A0  <-- current ramo #1 ACS712 30A con divisore 5V -> 3V3
 A1  <-- current ramo #2 ACS712 30A con divisore 5V -> 3V3
 A2  <-- temperatura VTX LM35
 A3
+
+- inserire 2 partitori 5V -> 3V3 per i sensori corrente ACS712 30A da 66mV / A con 2.5 V a 0A in +/-
+  https://damien.douxchamps.net/elec/resdiv/
+  -30A = 0.52V, +30A = 4.48V  partitore / 0.66  510 ohm / 1k ohm
