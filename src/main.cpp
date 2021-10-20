@@ -7,7 +7,9 @@
 #define DEBUG_MSG_TX            false
 #define DEBUG_MSG_RX            false
 #define DEBUG_PIN               false
-#define DEBUG_VALUE             true
+#define DEBUG_VALUE             false
+#define DEBUG_VERBOSE           true
+#define SMOOTH_SERVO            false
 
 #if DEBUG_PIN
 #define TEST_PIN(gpio_nr)          { Serial.print("TEST_PIN BEGIN:"); \
@@ -32,8 +34,13 @@
 #define PR(msg, value)          {}           
 #endif
 
+#if DEBUG_VERBOSE
 #define PR_VALUE(msg, value)    { Serial.print(F(msg)); Serial.println(value); }
 #define PR_FLOAT(msg, value)    { Serial.print(F(msg)); Serial.println(value, 4); /* atmega version */ }
+#else
+#define PR_VALUE(msg, value)    {}
+#define PR_FLOAT(msg, value)    {}   
+#endif
 
 
 /*
@@ -150,6 +157,35 @@ MENU_OUTPUTS(out,MAX_DEPTH
 
 NAVROOT(nav,mainMenu,MAX_DEPTH,in,out);
 
+//--- SERVO ---------------------------------------------------------------------
+#if SMOOTH_SERVO
+#include <Derivs_Limiter.h>
+Derivs_Limiter limiter = Derivs_Limiter(100, 75); // velocityLimit, accelerationLimit
+#endif
+#include <Servo.h>
+
+#define SERVO_PAN_PIN     8
+#define SERVO_TILT_PIN    9
+
+Servo servoPan;
+Servo servoTilt;
+
+#define SERVO_MIN         (30.0)
+#define SERVO_MAX         (160.0)
+
+int mapfi(float x, float in_min, float in_max, float out_min, float out_max) {
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+void servoWrite(float pan, float tilt) {
+#if SMOOTH_SERVO
+  servoPan.write(limiter.calc(mapfi(pan, 0.0, 3.3, SERVO_MIN, SERVO_MAX)));
+  servoTilt.write(limiter.calc(mapfi(tilt, 0.0, 3.3, SERVO_MAX, SERVO_MIN)));
+#else
+  servoPan.write(mapfi(pan, 0.0, 3.3, SERVO_MIN, SERVO_MAX));
+  servoTilt.write(mapfi(tilt, 0.0, 3.3, SERVO_MAX, SERVO_MIN));
+#endif
+}
 
 //-------------------------------------------------------------------------------
 #include <TaskScheduler.h>
@@ -192,15 +228,15 @@ void sensorReading() {
 
   if (state == ERR_NONE) {
     // the packet was successfully transmitted
-    Serial.println(F("I:Si4432:TX:success!"));
+    Serial.println("I:Si4432:TX:success!");
 
   } else if (state == ERR_PACKET_TOO_LONG) {
     // the supplied packet was longer than 256 bytes
-    Serial.println(F("I:Si4432:TX:too long!"));
+    Serial.println("I:Si4432:TX:too long!");
 
   } else if (state == ERR_TX_TIMEOUT) {
     // timeout occured while transmitting packet
-    Serial.println(F("I:Si4432:TX:timeout!"));
+    Serial.println("I:Si4432:TX:timeout!");
 
   } else {
     // some other error occurred
@@ -281,7 +317,11 @@ void setup() {
     Serial.println(state);
     while (true);
   }
-
+  //
+  servoPan.attach(SERVO_PAN_PIN);
+  servoTilt.attach(SERVO_TILT_PIN);
+  servoWrite(90, 90);
+  //
   runner.init();
   runner.addTask(sensorTask);
   sensorTask.enable();
@@ -301,8 +341,8 @@ void loop() {
     // print the data of the packet
     // Serial.print(F("I:Si4432:RX:Data:"));
     // nSerial.println((char*)payload);
-    PR_FLOAT("\nI:RX:PAN:", rxAnalogPan);
-    PR_FLOAT("I:RX:TILT:", rxAnalogTilt);
+    PR_FLOAT("\nI:RX:PAN:", rxAnalogPan);   // pan / tilt in Volts 0..3V3
+    PR_FLOAT("I:RX:TILT:", rxAnalogTilt);   // pan / tilt in Volts 0..3V3
     PR_VALUE("I:RX:BLK:", rxBTNBlkValue);
     PR_VALUE("I:RX:RED:", rxBTNRedValue);
     PR_VALUE("I:RX:SIZE:", unpacker.size());
@@ -328,4 +368,5 @@ void loop() {
   if (nav.changed(0)) {
     nav.doOutput();
   }
+  servoWrite(rxAnalogPan, rxAnalogTilt);
 }

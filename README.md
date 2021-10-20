@@ -51,3 +51,8 @@ A3
 - inserire 2 partitori 5V -> 3V3 per i sensori corrente ACS712 30A da 66mV / A con 2.5 V a 0A in +/-
   https://damien.douxchamps.net/elec/resdiv/
   -30A = 0.52V, +30A = 4.48V  partitore / 0.66  510 ohm / 1k ohm
+
+il chip è al 90 / 104 % di flash, passare al sistema superiore atmega 644/1284
+https://wiki.microduinoinc.com/Microduino-Module_Core%2B
+
+se si vuole installare la smooth servo library e sviluppare altre voci di menu
